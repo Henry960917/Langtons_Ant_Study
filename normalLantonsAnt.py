@@ -3,16 +3,16 @@ import random
 
 W = 400
 H = 250
-ants = 20
+ants = 1
 cellSize = 4
 cnt = 0
 dx = [-1, 0, 1, 0]
-dy = [0, 1, 0, -1]
+dy = [0, 1, 0, -1] #urdl
 grid = [[0 for _ in range(W)] for _ in range(H)]
 
 pygame.init()
 screen = pygame.display.set_mode((W*cellSize, H*cellSize))
-pygame.display.set_caption("AI蘭頓螞蟻")
+pygame.display.set_caption("原汁原味蘭頓螞蟻")
 
 class Ant:
     def __init__(self):
