@@ -21,7 +21,7 @@ colors = [
 
 pygame.init()
 screen = pygame.display.set_mode((W*cellSize, H*cellSize))
-pygame.display.set_caption("AI蘭頓螞蟻")
+pygame.display.set_caption("RLR蘭頓螞蟻")
 
 class Ant:
     def __init__(self):
