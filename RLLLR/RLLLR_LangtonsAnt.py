@@ -9,7 +9,7 @@ cnt = 0
 dx = [-1, 0, 1, 0]
 dy = [0, 1, 0, -1]
 grid = [[0 for _ in range(W)] for _ in range(H)]
-rule = [-1,1,1,1,1] #RLRR
+rule = [1,-1,-1,-1,1] #RLLLR
 
 colors = [
     (255,255,255),  # 0 白
@@ -21,7 +21,7 @@ colors = [
 
 pygame.init()
 screen = pygame.display.set_mode((W*cellSize, H*cellSize))
-pygame.display.set_caption("RL蘭頓螞蟻")
+pygame.display.set_caption("RRL蘭頓螞蟻")
 
 class Ant:
     def __init__(self):
@@ -45,7 +45,7 @@ while run:
     cnt+=1
     
     print("目前回合數:", cnt)
-    for _ in range(200): #加速用，先設個20好了
+    for _ in range(20): #加速用，先設個20好了
         for i in manyAnts:
             x = i.x
             y = i.y
