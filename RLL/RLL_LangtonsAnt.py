@@ -45,7 +45,7 @@ while run:
     cnt+=1
     
     print("目前回合數:", cnt)
-    for _ in range(20): #加速用，先設個20好了
+    for _ in range(200000): #加速用，先設個20好了
         for i in manyAnts:
             x = i.x
             y = i.y

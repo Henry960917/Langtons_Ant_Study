@@ -1,4 +1,5 @@
-//我把相同軌跡的去除(保留R開頭的組合，L開頭的組合去除掉)、全為1或-1的也去除
+//我把相同軌跡的去除(保留R開頭的組合，L開頭的組合去除掉)、全為R或全為L的也去除
+//請輸入n
 #include <iostream>
 #include <cmath>
 #include <vector>
