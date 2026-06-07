@@ -356,12 +356,164 @@ pygame.quit()
 |L2NNL1L2L1 |![螢幕擷取畫面 2026-06-03 233235](https://hackmd.io/_uploads/SkZPFTaxMg.png)|循環生長|82000|
 |L1L2NUL2L1R2 |![螢幕擷取畫面 2026-06-05 120150](https://hackmd.io/_uploads/B1gLqpkZfx.png)|螺旋生長|60000|
 |L1R1L1R1 |![R1L1R1L1](https://hackmd.io/_uploads/rkD7sll-Mx.png)|對稱|100000|
-|NR1 |![NR1](https://hackmd.io/_uploads/H1w2seeWzx.png)|類高速公路|40000|
+|NR1 |![NR1](https://hackmd.io/_uploads/H1w2seeWzx.png)|高速公路|40000|
 |L1L2L2L2UNL1R1 |![L1L2L2L2UNL1R1](https://hackmd.io/_uploads/Sk72xWe-zl.png)|高速公路|80000|
 |R2L1L2R1R1UR1 |![螢幕擷取畫面 2026-06-05 160209](https://hackmd.io/_uploads/SJt5MWgbfg.png)|高速公路|100000|
 |UNL2UL1R2N |![螢幕擷取畫面 2026-06-05 160455](https://hackmd.io/_uploads/ByQr7WgWGx.png)|矩形擴張|60000|
 |R2L2UL2R2 |![螢幕擷取畫面 2026-06-05 160711](https://hackmd.io/_uploads/HkxRmbgWGl.png)|高速公路|60000|
 |L2R1L2R1L2UL1R1 |![螢幕擷取畫面 2026-06-05 161158](https://hackmd.io/_uploads/SJ-KH-gWfl.png)|螺旋生長|60000|
+
+## 推廣_八角形蘭頓螞蟻
+規則增為8種:N(不變)、R1(順時針旋轉45度)、R2(順時針旋轉90度)、R3(順時針旋轉135度)、U(旋轉180度)、L1(逆時針旋轉45度)、L2(逆時針旋轉90度)、L3(逆時針旋轉135度)。
+
+筆者在此有稍微優化一下程式(如下)，我們只需要處理有變動的格子就好，而不用掃完整張地圖一個一個渲染，如此程式才不會越跑越慢。
+
+### 完整程式碼
+```python
+import pygame
+import random
+import math
+
+W = 800
+H = 500
+ants = 1
+cellSize = 2
+cnt = 0
+
+dx = [-1,-1,0,1,1,1,0,-1]
+dy = [0,1,1,1,0,-1,-1,-1]
+
+N = 0
+R1 = 1
+R2 = 2
+R3 = 3
+U = 4
+L3 = -3
+L2 = -2
+L1 = -1
+
+
+grid = [[0 for _ in range(W)] for _ in range(H)]
+rule = [N,U,R1,L1,R1,L1]
+
+colors = [
+    (255,255,255),   # 0 白
+    (0,0,0),         # 1 黑
+    (255,0,0),       # 2 紅
+    (0,255,0),       # 3 綠
+    (0,0,255),       # 4 藍
+    (255,0,255),     # 5 洋紅
+    (255,255,0),     # 6 黃
+    (0,255,255),     # 7 青
+    (255,128,0),     # 8 橘
+    (128,0,255),     # 9 紫
+    (128,128,128),   # 10 灰
+    (255,192,203),   # 11 粉紅
+    (139,69,19),     # 12 棕
+    (0,128,128),     # 13 深青
+    (128,255,0),     # 14 黃綠
+    (75,0,130),      # 15 靛
+    (255,215,0),     # 16 金
+    (173,216,230),   # 17 淺藍
+    (240,230,140),   # 18 卡其
+    (220,20,60),     # 19 深紅
+    (50,205,50),     # 20 萊姆綠
+    (70,130,180),    # 21 鋼藍
+    (210,105,30),    # 22 巧克力
+    (255,140,0),     # 23 深橘
+    (199,21,133),    # 24 紫紅
+    (154,205,50),    # 25 黃綠2
+    (0,191,255),     # 26 天藍
+    (186,85,211),    # 27 中紫
+    (255,99,71),     # 28 番茄紅
+    (46,139,87),     # 29 海綠
+]
+
+window_w = int(1.85*cellSize*W + cellSize)
+window_h = int(1.85*cellSize*H + cellSize)
+
+pygame.init()
+screen = pygame.display.set_mode((window_w, window_h))
+pygame.display.set_caption("蘭頓螞蟻")
+
+oct_shape = []
+for i in range(8):
+    theta = math.pi / 4 * i
+    oct_shape.append((math.cos(theta), math.sin(theta)))
+
+class Ant:
+    def __init__(self):
+        self.x = H//2
+        self.y = W//2
+        self.dir = random.randint(0, 7) #朝向哪
+
+manyAnts = []
+for i in range(ants):
+    manyAnts.append(Ant())
+
+def gridToPx(row,col):
+    cx = col*1.85*cellSize + cellSize
+    cy = row*1.85*cellSize + cellSize
+    return cx,cy #中心座標
+
+run = True
+screen.fill((255,255,255))
+while run:
+    pygame.time.Clock().tick(60)
+
+    for event in pygame.event.get():
+        if event.type==pygame.QUIT:
+            run = False
+
+    cnt+=1
+    print("目前回合數:", cnt)
+
+    changed = []
+
+    for _ in range(200): #加速用，先設個20好了
+        for i in manyAnts:
+            x = i.x
+            y = i.y
+            d = i.dir
+            c = grid[x][y]    #目前顏色
+            d = (d + rule[c] + 8) % 8
+            grid[x][y] = (c + 1) % len(rule)
+            changed.append((x,y))
+            x = (x + dx[d] + H) % H
+            y = (y + dy[d] + W) % W
+            i.x = x
+            i.y = y
+            i.dir = d
+
+    for i,j in changed:
+        c = grid[i][j]
+        cx, cy = gridToPx(i, j)
+        points=[]
+        for k,l in oct_shape:
+            points.append((cx+cellSize*k, cy+cellSize*l))
+        pygame.draw.polygon(screen, colors[c % len(colors)], points)
+
+    pygame.display.flip()
+
+pygame.quit()
+```
+
+### 範例
+
+|規則 | 圖形   |  軌跡   | 步數(大約) |
+|--- | :---: | ------ | --- |
+|UUR2UL2R2 |![螢幕擷取畫面 2026-06-07 152226](https://hackmd.io/_uploads/rJefTqfWMx.png)|高速公路|10000|
+|NR1 |![螢幕擷取畫面 2026-06-06 172353](https://hackmd.io/_uploads/S1g9vwbWGe.png)|高速公路|40000|
+|R2L2R1L1R2L2R1L1UU |![螢幕擷取畫面 2026-06-06 201955](https://hackmd.io/_uploads/B1Onx9bWfl.png)|高速公路|40000|
+|R3R1UL1L3 |![螢幕擷取畫面 2026-06-06 211158](https://hackmd.io/_uploads/BJ-a3qZ-fe.png)|高速公路|100000|
+|R3R1NR1L3 |![螢幕擷取畫面 2026-06-06 212714](https://hackmd.io/_uploads/SymwgiWWfl.png)|高速公路|100000|
+|L3R1NR1L3 |![螢幕擷取畫面 2026-06-06 213324](https://hackmd.io/_uploads/HyuRZiZWzl.png)|高速公路|200000|
+|L3R3NR3L3 |![螢幕擷取畫面 2026-06-06 213747](https://hackmd.io/_uploads/rkC6MjZ-ze.png)|高速公路|1500000|
+|L3R3UUNNR3L3 |![螢幕擷取畫面 2026-06-06 214535](https://hackmd.io/_uploads/H1XjEj-Wze.png)|高速公路|200000|
+|NUUNR2 |![螢幕擷取畫面 2026-06-07 151500](https://hackmd.io/_uploads/SyX595fZzl.png)|高速公路|300000|
+|NUR1L1R1L1 |![螢幕擷取畫面 2026-06-07 153442](https://hackmd.io/_uploads/HyamJjMZfl.png)|高速公路|200000|
+
+
 
 ## 參考資料
 * [Langton's ant - Wikipedia](https://en.wikipedia.org/wiki/Langton%27s_ant)
